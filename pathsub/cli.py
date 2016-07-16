@@ -1,4 +1,4 @@
-from .core import MOVE, COPY, LOG_ERROR, LOG_INFO, LOG_DEBUG, pathsub, __version__
+from .core import LOG_ERROR, LOG_INFO, LOG_DEBUG, move, copy, __version__
 from .plan import resub_string_iterator, resub_basename_iterator
 
 import argparse
@@ -7,32 +7,47 @@ import re
 import sys
 
 
-DOC_DATA = {
+MOVE = 0
+COPY = 1
+
+DATA = {
     MOVE: dict(
-        other=COPY,
-        name="submv",
-        verb="rename or move",
-        verbing="renaming or moving",
-        description="""Rename or move files by performing find-replace
-                       operations on their paths."""
+        func    = move,
+        is_copy = False,
+        strings = dict(
+            name         = "submv",
+            plan_verb    = "move",
+            help_verb    = "rename or move",
+            help_verbing = "renaming or moving",
+            description  = """Rename or move files by performing find-replace
+                              operations on their paths."""
+        )
     ),
     COPY: dict(
-        other=MOVE,
-        name="subcp",
-        verb="copy",
-        verbing="copying",
-        description="""Copy files by performing find-replace
-                       operations on their paths."""
+        func    = copy,
+        is_copy = True,
+        strings = dict(
+            name         = "subcp",
+            plan_verb    = "copy",
+            help_verb    = "copy",
+            help_verbing = "copying",
+            description  = """Copy files by performing find-replace
+                              operations on their paths."""
+        )
     )
 }
+
+DATA[MOVE]["other"] = DATA[COPY]
+DATA[COPY]["other"] = DATA[MOVE]
+
 
 def get_arg_parser(my_strings, other_strings):
     p = argparse.ArgumentParser(
         description=my_strings['description'],
         epilog="""To {other_verb} files instead of {verbing} them, use
                   {other_script}.""".format(
-                      other_verb=other_strings['verb'],
-                      verbing=my_strings['verbing'],
+                      other_verb=other_strings['help_verb'],
+                      verbing=my_strings['help_verbing'],
                       other_script=other_strings['name']
                   )
     )
@@ -53,7 +68,7 @@ def get_arg_parser(my_strings, other_strings):
 
     p.add_argument("paths",
         metavar="PATH", nargs="+",
-        help="""The files to {}.""".format(my_strings['verb'])
+        help="""The files to {}.""".format(my_strings['help_verb'])
     )
 
     p.add_argument("-b", "--basename",
@@ -118,14 +133,12 @@ def get_arg_parser(my_strings, other_strings):
     return p
 
 
-def show_plan(src_dest_iter, operation, out_stream=sys.stdout):
-    verb = "move" if operation == MOVE else "copy"
-
+def show_plan(src_dest_iter, is_copy, verb, out_stream=sys.stdout):
     sources = set()
     conflicts_dict = collections.OrderedDict()
 
     for src, dest in src_dest_iter:
-        if operation == COPY:
+        if is_copy:
             sources.add(src)
         if src == dest:
             continue
@@ -169,10 +182,10 @@ def show_plan(src_dest_iter, operation, out_stream=sys.stdout):
 
 
 def run(operation, argv=None):
-    my_strings = DOC_DATA[operation]
-    other_strings = DOC_DATA[my_strings["other"]]
+    my_data = DATA[operation]
+    other_data = DATA[operation]["other"]
 
-    p = get_arg_parser(my_strings, other_strings)
+    p = get_arg_parser(my_data["strings"], other_data["strings"])
     args = p.parse_args(argv)
 
     if args.literal:
@@ -197,15 +210,18 @@ def run(operation, argv=None):
         log_level = LOG_ERROR - int(args.quiet) + int(args.verbose)
 
     if args.plan:
-        show_plan(iterator, operation=operation)
+        show_plan(
+            iterator,
+            my_data['is_copy'],
+            my_data['strings']['plan_verb']
+        )
         return 0
     else:
         if args.trial and log_level < LOG_INFO:
             log_level = LOG_INFO
 
-        success = pathsub(
+        success = my_data['func'](
             iterator,
-            operation=operation,
             trial=args.trial,
             log=log_level
         )
