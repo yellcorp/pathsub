@@ -6,8 +6,6 @@ import collections
 import re
 import sys
 
-from pprint import pprint
-
 
 DOC_DATA = {
     MOVE: dict(
