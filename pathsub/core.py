@@ -11,7 +11,7 @@ LOG_ERROR = 1
 LOG_INFO =  2
 LOG_DEBUG = 3
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __all__ = [
     "move", "copy",
     "LOG_NONE", "LOG_ERROR", "LOG_INFO", "LOG_DEBUG"
