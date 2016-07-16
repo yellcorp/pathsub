@@ -6,9 +6,6 @@ import sys
 import tempfile
 
 
-MOVE = 0
-COPY = 1
-
 LOG_NONE =  0
 LOG_ERROR = 1
 LOG_INFO =  2
@@ -16,8 +13,7 @@ LOG_DEBUG = 3
 
 __version__ = "0.0.1"
 __all__ = [
-    "pathsub",
-    "MOVE", "COPY",
+    "move", "copy",
     "LOG_NONE", "LOG_ERROR", "LOG_INFO", "LOG_DEBUG"
 ]
 
@@ -283,12 +279,7 @@ class CopyJob(BaseJob):
         self.push_undo("rm", (item.dest_path,))
 
 
-def pathsub(
-    src_dest_iter,
-    operation=MOVE,
-    trial=False,
-    log=LOG_ERROR # int, or tuple of (error_stream, info_stream, debug_stream), each of which can be None
-):
+def do_batch(job_ctor, src_dest_iter, trial, log):
     if log is None:
         log = LOG_NONE
 
@@ -302,13 +293,6 @@ def pathsub(
         streams = tuple(log)
 
     logger = Logger(*streams)
-
-    if operation == MOVE:
-        job_ctor = MoveJob
-    elif operation == COPY:
-        job_ctor = CopyJob
-    else:
-        raise ValueError("Invalid value for operation")
 
     job = job_ctor(src_dest_iter, logger)
     success = job.execute()
@@ -326,3 +310,11 @@ def pathsub(
         logger.info("Rollback complete")
 
     return success
+
+
+def move(src_dest_iter, trial=False, log=LOG_ERROR):
+    do_batch(MoveJob, src_dest_iter, trial, log)
+
+
+def copy(src_dest_iter, trial=False, log=LOG_ERROR):
+    do_batch(CopyJob, src_dest_iter, trial, log)
