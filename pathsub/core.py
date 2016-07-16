@@ -150,7 +150,7 @@ def format_exception(exc):
 UNINVOLVED = 0
 CONFLICT = 1
 PENDING = 2
-class Job(object):
+class BaseJob(object):
     def __init__(self, name_pairs, logger=None):
         self.items = [ FSItem(src, dest) for src, dest in name_pairs ]
 
@@ -161,16 +161,7 @@ class Job(object):
         self.index_current = dict((item.current_path, item) for item in self.items)
         self.index_dest    = dict((item.dest_path,    item) for item in self.items)
 
-    def push_undo(self, func, args):
-        self.undo.append((func, args))
-
-    def execute_move(self, abort_on_first_error=False):
-        return self.run(self.move_item, abort_on_first_error)
-
-    def execute_copy(self, abort_on_first_error=False):
-        return self.run(self.copy_item, abort_on_first_error)
-
-    def run(self, func, abort_on_first_error):
+    def execute(self, abort_on_first_error=False):
         success = True
 
         for item in self.items:
@@ -179,7 +170,7 @@ class Job(object):
                 continue
 
             try:
-                func(item)
+                self.process_item(item)
             except (EnvironmentError, OperationError) as exc:
                 success = False
                 self.logger.error(format_exception(exc))
@@ -188,31 +179,11 @@ class Job(object):
 
         return success
 
-    def move_item(self, item):
-        self.logger.info("move {} to {}".format(item.src_path, item.dest_path))
-        self.ensure_dir_for(item.dest_path)
-        if os.path.exists(item.dest_path):
-            reason, blocking_item = self.exist_reason(item)
+    def process_item(self, item):
+        raise NotImplementedError
 
-            if reason == PENDING:
-                temp_path = generate_path(blocking_item.current_path)
-                self.change_item_path(blocking_item, temp_path)
-
-            elif reason == CONFLICT:
-                raise make_conflict_error(item, blocking_item)
-            
-            else:
-                raise make_uninvolved_error(item)
-                
-        self.change_item_path(item, item.dest_path)
-
-    def copy_item(self, item):
-        self.logger.info("copy {} to {}".format(item.src_path, item.dest_path))
-        self.ensure_dir_for(item.dest_path)
-        if os.path.exists(item.dest_path):
-            raise OperationError("Path exists", item.dest_path)
-        self.agent.cp(item.current_path, item.dest_path)
-        self.push_undo("rm", (item.dest_path,))
+    def push_undo(self, func, args):
+        self.undo.append((func, args))
 
     def exist_reason(self, item):
         path = item.dest_path
@@ -282,6 +253,36 @@ class Job(object):
             raise ee
 
 
+class MoveJob(BaseJob):
+    def process_item(self, item):
+        self.logger.info("move {} to {}".format(item.src_path, item.dest_path))
+        self.ensure_dir_for(item.dest_path)
+        if os.path.exists(item.dest_path):
+            reason, blocking_item = self.exist_reason(item)
+
+            if reason == PENDING:
+                temp_path = generate_path(blocking_item.current_path)
+                self.change_item_path(blocking_item, temp_path)
+
+            elif reason == CONFLICT:
+                raise make_conflict_error(item, blocking_item)
+            
+            else:
+                raise make_uninvolved_error(item)
+                
+        self.change_item_path(item, item.dest_path)
+
+
+class CopyJob(BaseJob):
+    def process_item(self, item):
+        self.logger.info("copy {} to {}".format(item.src_path, item.dest_path))
+        self.ensure_dir_for(item.dest_path)
+        if os.path.exists(item.dest_path):
+            raise OperationError("Path exists", item.dest_path)
+        self.agent.cp(item.current_path, item.dest_path)
+        self.push_undo("rm", (item.dest_path,))
+
+
 def pathsub(
     src_dest_iter,
     operation=MOVE,
@@ -301,15 +302,16 @@ def pathsub(
         streams = tuple(log)
 
     logger = Logger(*streams)
-    job = Job(src_dest_iter, logger)
 
     if operation == MOVE:
-        success = job.execute_move()
+        job_ctor = MoveJob
     elif operation == COPY:
-        success = job.execute_copy()
+        job_ctor = CopyJob
     else:
         raise ValueError("Invalid value for operation")
 
+    job = job_ctor(src_dest_iter, logger)
+    success = job.execute()
     do_rollback = trial or not success
 
     if trial and not success:
