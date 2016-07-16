@@ -37,7 +37,7 @@ positional arguments:
                      specified, to match
   REPLACE            The replacement string. If SEARCH is a regular
                      expression, the content of capturing groups can be used
-                     by including \#, \g<#>, where # is a number, or \g<NAME>,
+                     by including \\#, \\g<#>, where # is a number, or \\g<NAME>,
                      where NAME is the name of a named group.
   PATH               The files to rename or move.
 
