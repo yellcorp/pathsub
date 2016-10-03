@@ -135,21 +135,20 @@ def get_arg_parser(my_strings, other_strings):
 
 def show_plan(src_dest_iter, is_copy, verb, out_stream=sys.stdout):
     sources = set()
-    conflicts_dict = collections.OrderedDict()
+    operations_by_dest = collections.OrderedDict()
 
     for src, dest in src_dest_iter:
         if is_copy:
             sources.add(src)
-        if src == dest:
-            continue
-        if dest not in conflicts_dict:
-            conflicts_dict[dest] = [ ]
-        conflicts_dict[dest].append((src, dest))
+        if src != dest:
+            if dest not in operations_by_dest:
+                operations_by_dest[dest] = [ ]
+            operations_by_dest[dest].append((src, dest))
 
     non_conflicts = [ ] # [ (src, dest) ... ]
     conflict_groups = [ ] # [ [ (src, dest) ... ] ... ]
 
-    for operations in conflicts_dict.values():
+    for operations in operations_by_dest.values():
         if len(operations) == 1 and operations[0][1] not in sources:
             non_conflicts.extend(operations)
         else:
