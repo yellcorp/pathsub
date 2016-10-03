@@ -147,18 +147,18 @@ def show_plan(src_dest_iter, is_copy, verb, out_stream=sys.stdout):
         conflicts_dict[dest].append((src, dest))
 
     non_conflicts = [ ] # [ (src, dest) ... ]
-    conflicts = [ ] # [ (conflict_path, [ (src, dest) ... ] ... ]
+    conflict_groups = [ ] # [ [ (src, dest) ... ] ... ]
 
-    for path, operations in conflicts_dict.items():
+    for operations in conflicts_dict.values():
         if len(operations) == 1 and operations[0][1] not in sources:
             non_conflicts.extend(operations)
         else:
-            conflicts.append((path, operations))
+            conflict_groups.append(operations)
 
     for src, dest in non_conflicts:
         print("{} {} to {}".format(verb, src, dest), file=out_stream)
 
-    for conflict_path, operations in conflicts:
+    for operations in conflict_groups:
         reasons = [ ]
         if len(operations) > 1:
             reasons.append("they share the same target name")
@@ -178,7 +178,7 @@ def show_plan(src_dest_iter, is_copy, verb, out_stream=sys.stdout):
         for src, dest in operations:
             print("{} {} to {}".format(verb, src, dest), file=out_stream)
 
-    return 0 if len(conflicts) == 0 else 1
+    return 0 if len(conflict_groups) == 0 else 1
 
 
 def run(operation, argv=None):
