@@ -176,7 +176,7 @@ def show_plan(src_dest_iter, is_copy, verb, out_stream=sys.stdout):
             file=out_stream
         )
         for src, dest in operations:
-            print("{} {} {}".format(src, symbol, dest), file=out_stream)
+            print("{} {} to {}".format(verb, src, dest), file=out_stream)
 
     return 0 if len(conflicts) == 0 else 1
 
