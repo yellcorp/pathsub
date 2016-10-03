@@ -141,9 +141,7 @@ def show_plan(src_dest_iter, is_copy, verb, out_stream=sys.stdout):
         if is_copy:
             sources.add(src)
         if src != dest:
-            if dest not in operations_by_dest:
-                operations_by_dest[dest] = [ ]
-            operations_by_dest[dest].append((src, dest))
+            operations_by_dest.setdefault(dest, [ ]).append((src, dest))
 
     non_conflicts = [ ] # [ (src, dest) ... ]
     conflict_groups = [ ] # [ [ (src, dest) ... ] ... ]
