@@ -207,6 +207,7 @@ def run(operation, argv=None):
         log_level = LOG_ERROR - int(args.quiet) + int(args.verbose)
 
     if args.plan:
+        print("Showing plan. No changes will be made.\n")
         show_plan(
             iterator,
             my_data['is_copy'],
