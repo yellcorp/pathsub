@@ -214,17 +214,17 @@ def run(operation, argv=None):
             my_data['strings']['plan_verb']
         )
         return 0
-    else:
-        if args.trial and log_level < LOG_INFO:
-            log_level = LOG_INFO
 
-        success = my_data['func'](
-            iterator,
-            trial=args.trial,
-            log=log_level
-        )
+    if args.trial and log_level < LOG_INFO:
+        log_level = LOG_INFO
 
-        return 0 if success else 1
+    success = my_data['func'](
+        iterator,
+        trial=args.trial,
+        log=log_level
+    )
+
+    return 0 if success else 1
 
 
 def submv_main():
