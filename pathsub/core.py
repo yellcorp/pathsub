@@ -184,6 +184,14 @@ class BaseJob(object):
     def exist_reason(self, item):
         path = item.dest_path
 
+        # FIXME: this is only checking against the *resulting* names.
+        #  There's the possibility it might clash with an existing name that is
+        #  going to be renamed, in which case the result should be PENDING.
+        #
+        # However this kind of doesn't work anyway, as it reports conflicts
+        # across directories, as if it's only comparing basenames. I'll need to
+        # look into why - I haven't touched this thing in a while. Rewrite
+        # time.
         if path in self.index_dest and self.index_dest[path] != item:
             return CONFLICT, self.index_dest[path]
 
