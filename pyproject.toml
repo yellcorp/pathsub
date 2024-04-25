@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "pathsub"
+version = "0.0.4"
+description = "Command-line utilities for performing find-replace operations on file paths."
+license = "MIT"
+authors = ["Jim Boswell <jimb@yellcorp.org>"]
+readme = "readme.rst"
+repository = "https://github.com/yellcorp/pathsub"
+classifiers = [
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: End Users/Desktop',
+    'Operating System :: POSIX :: Linux',
+    'Operating System :: MacOS :: MacOS X',
+    'Topic :: Utilities'
+]
+
+[tool.poetry.scripts]
+submv = "pathsub.cli:submv_main"
+subcp = "pathsub.cli:subcp_main"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
