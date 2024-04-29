@@ -1,4 +1,5 @@
 *.egg-info/
 *.py[cod]
 /build/
+/fixtures/
 __pycache__/
