@@ -1,5 +1,11 @@
 import subprocess
 import sys
 
-result = subprocess.run([sys.executable, "-m", "unittest", "discover", "-v", "tests"])
-sys.exit(result.returncode)
+cmds = [
+    "coverage run -m unittest discover -v tests",
+    "coverage report -m",
+    "coverage html",
+]
+
+rets = [subprocess.run(cmd.split()) for cmd in cmds]
+sys.exit(max(ret.returncode for ret in rets))

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pathsub"
 version = "0.0.5"
-description = "Command-line utilities for performing find-replace operations on file paths."
+description = "Command-line utility for performing find-replace operations on file paths."
 license = "MIT"
 authors = ["Jim Boswell <jimb@yellcorp.org>"]
 readme = "readme.rst"
@@ -26,10 +26,14 @@ black = "^24.4.2"
 isort = "^5.13.2"
 ruff = "^0.4.2"
 mypy = "^1.10.0"
+coverage = "^7.5.0"
 
 [tool.isort]
 profile = "black"
 order_by_type = false
+
+[tool.coverage.run]
+branch = true
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,5 +1,5 @@
-*.egg-info/
-*.py[cod]
-/build/
+*.pyc
+/.coverage
 /fixtures/
+/htmlcov/
 __pycache__/
