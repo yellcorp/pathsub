@@ -55,8 +55,8 @@ def make_arg_parser() -> argparse.ArgumentParser:
         help="""
             The replacement string. If SEARCH is a regular expression (that is,
             if -l/--literal is not specified), capturing groups can be
-            referenced by index with \N or \g<N>, where N is the group's
-            1-based index, or by name with \g<NAME>. For more detail see the
+            referenced by index with \\N or \\g<N>, where N is the group's
+            1-based index, or by name with \\g<NAME>. For more detail see the
             Python documentation for re.sub, specifically the repl argument.
         """,
     )
