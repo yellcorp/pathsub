@@ -13,7 +13,7 @@ from shlex import quote
 
 from .agents import Agent, Executive, HistoryAgent, RollbackError
 
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 
 from .fs import ensure_dir_for
 
@@ -36,7 +36,10 @@ class CliArgs:
 
 def make_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Rename or move files by performing find-replace operations on their paths.",
+        description="""
+            Rename or move files by performing find-replace operations
+            on their paths.
+        """,
     )
 
     p.add_argument(
@@ -53,11 +56,12 @@ def make_arg_parser() -> argparse.ArgumentParser:
         "replace",
         metavar="REPLACE",
         help="""
-            The replacement string. If SEARCH is a regular expression (that is,
-            if -l/--literal is not specified), capturing groups can be
-            referenced by index with \\N or \\g<N>, where N is the group's
-            1-based index, or by name with \\g<NAME>. For more detail see the
-            Python documentation for re.sub, specifically the repl argument.
+            The replacement string. If SEARCH is a regular expression
+            (that is, if -l/--literal is not specified), capturing
+            groups can be referenced by index with \\N or \\g<N>,
+            where N is the group's 1-based index, or by name with
+            \\g<NAME>. For more detail see the Python documentation
+            for re.sub, specifically the repl argument.
         """,
     )
 

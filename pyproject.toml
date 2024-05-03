@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pathsub"
-version = "0.0.5"
+version = "0.0.6"
 description = "Command-line utility for performing find-replace operations on file paths."
 license = "MIT"
 authors = ["Jim Boswell <jimb@yellcorp.org>"]
